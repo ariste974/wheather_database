@@ -1,12 +1,18 @@
 import psycopg2
 
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+MDP_DADABASE = os.getenv("MDP_DADABASE")
+
 def insert_data(row):
     conn = psycopg2.connect(
         host="16.170.202.253",
         port=5432,
         dbname="weatherdb",
         user="weatheruser",
-        password="27EASWeatherpass!"
+        password=MDP_DADABASE
     )
 
     cursor = conn.cursor()
