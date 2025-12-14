@@ -7,3 +7,5 @@ pandas
 meteostat
 
 weatherapi
+
+psycopg2-binary
