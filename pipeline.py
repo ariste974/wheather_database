@@ -6,9 +6,9 @@ import openmeteo_requests
 import requests_cache
 from retry_requests import retry
 
-from meteostat_api import get_meteostat_current
-from openmeteo_api import get_openmeteo_current
-from wheather_api import get_weatherapi_current
+from meteostat_api import get_meteostat_current, get_meteostat_last_24h
+from openmeteo_api import get_openmeteo_current, get_openmeteo_last_24h
+from wheather_api import get_weatherapi_current, get_weatherapi_last_24h
 
 from connect_db import insert_data
 
@@ -47,7 +47,7 @@ WEATHERAPI_KEY = os.getenv("API_KEY")
 # ===============================================================
 # PIPELINE 
 # ===============================================================
-def get_current_weather(LaTT, LON, CITY, STATION):
+def get_current_weather(LAT, LON, CITY, STATION):
     print("Fetching Open-Meteo...")
     open_data = get_openmeteo_current(LAT, LON)
 
@@ -65,9 +65,48 @@ def get_current_weather(LaTT, LON, CITY, STATION):
     row=df.iloc[0]
     print("Data fetched successfully:", df)
 
-    insert_data(row)
+    insert_data(row, LAT, LON)
     
     return "Data inserted into the database."
+
+
+
+def get_weather_last_24h(LAT, LON, CITY, STATION):
+    print("Fetching Open-Meteo (last 24h)...")
+    df_open = get_openmeteo_last_24h(LAT, LON)
+    
+    print("Fetching Meteostat (last 24h)...")
+    df_rain = get_meteostat_last_24h(STATION)
+    
+    print("Fetching WeatherAPI (last 24h)...")
+    df_wind = get_weatherapi_last_24h(WEATHERAPI_KEY, CITY)
+    
+    df_open["time"] = pd.to_datetime(df_open["time"], utc=True)
+    df_rain["time"] = pd.to_datetime(df_rain["time"], utc=True)
+    df_wind["time"] = pd.to_datetime(df_wind["time"], utc=True)
+
+    # 🔗 Fusion horaire
+    df = (
+        df_open
+        .merge(df_rain, on="time", how="left")
+        .merge(df_wind, on="time", how="left")
+        .sort_values("time")
+    )
+
+    if df.empty:
+        print("No data fetched.")
+        return "No data"
+
+    print(f"{len(df)} rows fetched")
+
+    # 🧠 Insertion ligne par ligne
+    for _, row in df.iterrows():
+        insert_data(row, LAT, LON)
+
+    print("Data successfully inserted into the database.")
+
+    return df
+
 
 
 # ===============================================================
@@ -80,6 +119,8 @@ if __name__ == "__main__":
         CITY=ville["city"]
         STATION=ville["station"]
         print(f"\n===== Traitement pour la ville de {CITY} =====")
-        result = get_current_weather(LAT, LON, CITY, STATION)
+        result = get_weather_last_24h(LAT, LON, CITY, STATION)
         print(result)
+        
+    
     
