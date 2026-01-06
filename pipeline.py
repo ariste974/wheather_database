@@ -22,12 +22,12 @@ load_dotenv()
 # Coordonnées et ville pour Riga
 
 
-
+sensor_id={"temperature_2m":"SENS-001","prcp":"SENS-002","wind_kph":"SENS-003","wind_degree":"SENS-004","humidity":"SENS-005","pressure_mb":"SENS-006"}
 list_ville=[
-  {"city":"Riga","country":"Latvia","lat":56.9496,"lon":24.1052, "station": None},
-  {"city":"Paris","country":"France","lat":48.8566,"lon":2.3522, "station": None},
-  {"city":"Berlin","country":"Germany","lat":52.52,"lon":13.405, "station": None},
-  {"city":"London","country":"UK","lat":51.5074,"lon":-0.1278, "station": None}
+  {"location_id":"LV-1000","city":"Riga","country":"Latvia","lat":56.9496,"lon":24.1052, "station": None,"device_id": "RIGA001"},
+  {"location_id":"FR-75000","city":"Paris","country":"France","lat":48.8566,"lon":2.3522, "station": None, "device_id": "PARIS001"},
+  {"location_id":"DE-1000","city":"Berlin","country":"Germany","lat":52.52,"lon":13.405, "station": None, "device_id": "BERLIN001"},
+  {"location_id":"UK-1000","city":"London","country":"UK","lat":51.5074,"lon":-0.1278, "station": None, "device_id": "LONDON001"}
 ]
 for ville in list_ville:
     CITY=ville["city"]

@@ -17,36 +17,22 @@ def insert_data(row, lat, lon):
 
     cursor = conn.cursor()
 
-    query = """
-INSERT INTO meteo (
-    time,
-    temperature_2m,
-    prcp,
-    wind_kph,
-    wind_degree,
-    humidity,
-    pressure_mb,
-    location
-)
-VALUES (
-    %s, %s, %s, %s, %s, %s, %s,
-    ST_SetSRID(ST_MakePoint(%s, %s), 4326)
-);
-"""
 
-    cursor.execute(query, (
+    query_weather = """INSERT INTO weather_readings ( sensor_id, reading_ts, temperature_2m,prcp,wind_kph,wind_degree,humidity,pressure_mb) VALUES (%s, %s, %s, %s, %s, %s, %s, %s); """
+
+    cursor.execute(query_weather, (
+    row["sensor_id"],
     row["time"],                                         # datetime tz-aware
     float(row["temperature_2m"]) if row["temperature_2m"] is not None else None,
     float(row["prcp"]) if row["prcp"] is not None else None,
     float(row["wind_kph"]) if row["wind_kph"] is not None else None,
     int(row["wind_degree"]) if row["wind_degree"] is not None else None,
     float(row.get("humidity")) if row.get("humidity") is not None else None,
-    float(row.get("pressure_mb")) if row.get("pressure_mb") is not None else None,
-    float(lon),                                         # longitude
-    float(lat)                                          # latitude
+    float(row.get("pressure_mb")) if row.get("pressure_mb") is not None else None
 ))
 
 
     conn.commit()
     cursor.close()
     conn.close()
+
