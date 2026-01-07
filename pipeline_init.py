@@ -8,9 +8,9 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
-host="16.171.133.144"
+host="51.20.31.180"
 
-sensor_id=[{"temperature_2m":"SENS-001", "sensor_name":"temperature_2m","metric":"temperature_2m","unit":"°C","device_id":["RIGA001","PARIS001","BERLIN001","LONDON001"]},{"prcp":"SENS-002", "sensor_name":"prcp","metric":"prcp","unit":"mm","device_id":["RIGA001","PARIS001","BERLIN001","LONDON001"]},{"wind_kph":"SENS-003", "sensor_name":"wind_kph","metric":"wind_kph","unit":"km/h","device_id":["RIGA001","PARIS001","BERLIN001","LONDON001"]},{"wind_degree":"SENS-004", "sensor_name":"wind_degree","metric":"wind_degree","unit":"°","device_id":["RIGA001","PARIS001","BERLIN001","LONDON001"]},{"humidity":"SENS-005", "sensor_name":"humidity","metric":"humidity","unit":"%","device_id":["RIGA001","PARIS001","BERLIN001","LONDON001"]},{"pressure_mb":"SENS-006", "sensor_name":"pressure_mb","metric":"pressure_mb","unit":"mb","device_id": ["RIGA001","PARIS001","BERLIN001","LONDON001"]}]
+sensor_id=[{"sensor_id":"SENS-001", "sensor_name":"temperature_2m","metric":"temperature","unit":"°C","device_id":["RIGA001","PARIS001","BERLIN001","LONDON001"]},{"sensor_id":"SENS-002", "sensor_name":"prcp","metric":"rainfall","unit":"mm","device_id":["RIGA001","PARIS001","BERLIN001","LONDON001"]},{"sensor_id":"SENS-003", "sensor_name":"wind_kph","metric":"wind_speed","unit":"km/h","device_id":["RIGA001","PARIS001","BERLIN001","LONDON001"]},{"sensor_id":"SENS-004", "sensor_name":"wind_degree","metric":"wind_direction","unit":"°","device_id":["RIGA001","PARIS001","BERLIN001","LONDON001"]},{"sensor_id":"SENS-005", "sensor_name":"humidity","metric":"relative_humidity","unit":"%","device_id":["RIGA001","PARIS001","BERLIN001","LONDON001"]},{"sensor_id":"SENS-6", "sensor_name":"pressure_mb","metric":"air_pressure","unit":"mb","device_id": ["RIGA001","PARIS001","BERLIN001","LONDON001"]}]
 list_ville=[
   {"location_id":"LV-1000","city":"Riga","country":"Latvia","lat":56.9496,"lon":24.1052, "station": None,"device_id": "RIGA001"},
   {"location_id":"FR-75000","city":"Paris","country":"France","lat":48.8566,"lon":2.3522, "station": None, "device_id": "PARIS001"},
@@ -113,8 +113,11 @@ def insert_data_sensors(row, lat, lon):
     cursor.close()
     conn.close()
 
-for ville in list_ville:
-    for sensor in sensor_id:
+
+    
+for sensor in sensor_id:
+    for device_id in sensor["device_id"]:
         row=sensor.copy()
-        row["device_id"]=ville["device_id"]
+        row["device_id"]=device_id
+        print("Inserting sensor:", row)
         insert_data_sensors(row, ville["lat"], ville["lon"])
