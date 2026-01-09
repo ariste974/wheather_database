@@ -34,7 +34,7 @@ def get_meteostat_current(station):
 
 def get_meteostat_last_24h(station):
     end = datetime.utcnow()
-    start = end - timedelta(hours=24)
+    start = end - timedelta(hours=168)
 
     df = Hourly(station, start, end).fetch()
 

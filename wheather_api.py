@@ -30,33 +30,36 @@ def get_weatherapi_current(api_key, city):
 
 def get_weatherapi_last_24h(api_key, city):
     """
-    Récupère les dernières 24h de vent, humidité et pression depuis WeatherAPI.
+    Récupère les dernières 7 jours d'heures (UTC) depuis WeatherAPI.
     Retourne un DataFrame tz-aware UTC.
     """
-    # Dates UTC
     end = pd.Timestamp.utcnow()
-    start = end - pd.Timedelta(hours=24)
-
-    today = end.date().isoformat()
-    yesterday = (end - pd.Timedelta(days=1)).date().isoformat()
+    start = end - pd.Timedelta(hours=168)  # 7 jours
 
     df_list = []
 
-    for day in [yesterday, today]:
+    for day in pd.date_range(start.normalize(), end.normalize(), freq="D"):
         url = "http://api.weatherapi.com/v1/history.json"
-        params = {"key": api_key, "q": city, "dt": day}
-        data = requests.get(url, params=params, timeout=10).json()
+        params = {"key": api_key, "q": city, "dt": day.date().isoformat()}
+        try:
+            data = requests.get(url, params=params, timeout=10).json()
+        except Exception:
+            continue
 
-        hours = data.get("forecast", {}).get("forecastday", [])[0].get("hour", [])
+        forecast_days = data.get("forecast", {}).get("forecastday", [])
+        if not forecast_days:
+            continue
+
+        hours = forecast_days[0].get("hour", [])
         if not hours:
             continue
 
         df_day = pd.DataFrame([{
-            "time": pd.to_datetime(h["time"], utc=True),
-            "wind_kph": h["wind_kph"],
-            "wind_degree": h["wind_degree"],
-            "humidity": h.get("humidity", None),       # humidité %
-            "pressure_mb": h.get("pressure_mb", None)  # pression atmosphérique
+            "time": pd.to_datetime(h.get("time"), utc=True),
+            "wind_kph": h.get("wind_kph"),
+            "wind_degree": h.get("wind_degree"),
+            "humidity": h.get("humidity", None),
+            "pressure_mb": h.get("pressure_mb", None)
         } for h in hours])
 
         df_list.append(df_day)
@@ -64,10 +67,12 @@ def get_weatherapi_last_24h(api_key, city):
     if not df_list:
         return pd.DataFrame(columns=["time", "wind_kph", "wind_degree", "humidity", "pressure_mb"])
 
-    # Concat toutes les heures
     df = pd.concat(df_list, ignore_index=True)
+    df = df.dropna(subset=["time"])
+    df = df.sort_values("time").reset_index(drop=True)
 
-    # Filtrer les dernières 24h exactes
+    # Filtrer uniquement l'intervalle exact demandé
     df = df[(df["time"] >= start) & (df["time"] < end)].reset_index(drop=True)
 
     return df
+

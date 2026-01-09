@@ -46,7 +46,7 @@ def get_openmeteo_last_24h(lat, lon):
 
     # Définir la période des dernières 24h
     end = pd.Timestamp.utcnow()
-    start = end - pd.Timedelta(hours=24)
+    start = end - pd.Timedelta(hours=168)
     print(f"Fetching Open-Meteo data from {start} to {end} for lat={lat}, lon={lon}")
     # Open-Meteo Historical API
     url = "https://archive-api.open-meteo.com/v1/archive"
