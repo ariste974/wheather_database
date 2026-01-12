@@ -159,16 +159,16 @@ def insert_data_location(row, lat, lon):
         row["location_id"],
         row["city"],
         row["country"],
-        lat,
-        lon
+        lon,
+        lat
     ))
 
     conn.commit()
     cursor.close()
     conn.close()
 
-for ville in list_ville:
-    insert_data_location(ville, ville["lat"], ville["lon"])
+"""for ville in list_ville:
+    insert_data_location(ville, ville["lat"], ville["lon"])"""
 
 query_sensors = """INSERT INTO sensors ( sensor_id, device_id, sensor_name, metric, unit) VALUES (%s, %s, %s, %s, %s); """
 
@@ -221,10 +221,10 @@ def insert_data_device(row, lat, lon):
     conn.commit()
     cursor.close()
     conn.close()
-
+"""
 # Insert devices first so sensors' foreign key to devices is satisfied
 for ville in list_ville:
-    insert_data_device(ville, ville["lat"], ville["lon"])
+    insert_data_device(ville, ville["lat"], ville["lon"])"""
 
 # Then insert sensors (devices now exist)
 for sensor in sensor_id:
